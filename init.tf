@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.7.0"
+    }
+    azapi = {
+      source  = "Azure/azapi"
+      version = ">= 1.0"
+    }
+  }
+}
+
 locals {
   name = "${var.department}-api-mgmt-${local.environment}"
   # platform_api_mgmt_sku = var.environment == "prod" ? "Premium_1" : "Developer_1"
