@@ -12,8 +12,9 @@ data "azurerm_key_vault_certificate" "certificate" {
 }
 
 data "azapi_resource" "apim_custom_properties" {
-  type        = "Microsoft.ApiManagement/service@2022-08-01"
-  resource_id = azurerm_api_management.apim.id
+  type                   = "Microsoft.ApiManagement/service@2022-08-01"
+  resource_id            = azurerm_api_management.apim.id
+  response_export_values = ["properties.customProperties"]
 
   depends_on = [azurerm_api_management.apim]
 }
