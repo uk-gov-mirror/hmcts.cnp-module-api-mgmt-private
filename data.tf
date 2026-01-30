@@ -10,3 +10,11 @@ data "azurerm_key_vault_certificate" "certificate" {
   name         = (local.key_vault_environment == "prod") ? "wildcard-platform-hmcts-net" : "wildcard-${local.key_vault_environment}-platform-hmcts-net"
   key_vault_id = data.azurerm_key_vault.main.id
 }
+
+data "azapi_resource" "apim_custom_properties" {
+  type                   = "Microsoft.ApiManagement/service@2022-08-01"
+  resource_id            = azurerm_api_management.apim.id
+  response_export_values = ["properties.customProperties"]
+
+  depends_on = [azurerm_api_management.apim]
+}

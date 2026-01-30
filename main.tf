@@ -103,3 +103,22 @@ resource "azurerm_api_management_logger" "apim" {
     instrumentation_key = module.application_insights.instrumentation_key
   }
 }
+
+resource "azapi_update_resource" "apim_disable_trusted_service_connectivity" {
+  count       = var.disable_trusted_service_connectivity ? 1 : 0
+  type        = "Microsoft.ApiManagement/service@2022-08-01"
+  resource_id = azurerm_api_management.apim.id
+
+  body = {
+    properties = {
+      customProperties = merge(
+        try(data.azapi_resource.apim_custom_properties.output.properties.customProperties, {}),
+        {
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.ManagedIdentity.DisableOverPrivilegedAccess" = "True"
+        }
+      )
+    }
+  }
+
+  depends_on = [azurerm_api_management.apim]
+}
