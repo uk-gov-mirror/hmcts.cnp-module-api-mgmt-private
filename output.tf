@@ -13,6 +13,6 @@ output "custom_properties_after_update" {
   value = var.disable_trusted_service_connectivity ? try(
     azapi_update_resource.apim_disable_trusted_service_connectivity[0].body.properties.customProperties,
     {}
-  ) : "Not applied - disable_trusted_service_connectivity is false"
+  ) : {}
   sensitive = true
 }
