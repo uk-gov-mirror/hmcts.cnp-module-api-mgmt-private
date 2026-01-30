@@ -33,7 +33,7 @@ resource "azurerm_api_management" "apim" {
     type = "SystemAssigned"
   }
 
-  zones = local.zones
+  zones                = local.zones
   public_ip_address_id = azurerm_public_ip.apim.id
 
   sku_name = local.sku_name
@@ -52,19 +52,18 @@ resource "azurerm_api_management" "apim" {
 }
 
 resource "azurerm_role_assignment" "apim" {
-  principal_id = data.azurerm_api_management.apim.identity[0]["principal_id"]
+  principal_id = azurerm_api_management.apim.identity[0].principal_id
   scope        = data.azurerm_key_vault.main.id
 
   role_definition_name = "Key Vault Secrets User"
 
   depends_on = [
-    azurerm_api_management.apim,
-    data.azurerm_api_management.apim
+    azurerm_api_management.apim
   ]
 }
 
 resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
-  api_management_id = data.azurerm_api_management.apim.id
+  api_management_id = azurerm_api_management.apim.id
 
   gateway {
     host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt.platform.hmcts.net" : "${var.department}-api-mgmt.${local.key_vault_environment}.platform.hmcts.net"
@@ -90,7 +89,6 @@ resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
   depends_on = [
     data.azurerm_key_vault_certificate.certificate,
     azurerm_api_management.apim,
-    data.azurerm_api_management.apim,
     azurerm_role_assignment.apim
   ]
 }
@@ -104,4 +102,23 @@ resource "azurerm_api_management_logger" "apim" {
   application_insights {
     instrumentation_key = module.application_insights.instrumentation_key
   }
+}
+
+resource "azapi_update_resource" "apim_disable_trusted_service_connectivity" {
+  count       = var.disable_trusted_service_connectivity ? 1 : 0
+  type        = "Microsoft.ApiManagement/service@2022-08-01"
+  resource_id = azurerm_api_management.apim.id
+
+  body = {
+    properties = {
+      customProperties = merge(
+        try(data.azapi_resource.apim_custom_properties.output.properties.customProperties, {}),
+        {
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.ManagedIdentity.DisableOverPrivilegedAccess" = "True"
+        }
+      )
+    }
+  }
+
+  depends_on = [azurerm_api_management.apim]
 }

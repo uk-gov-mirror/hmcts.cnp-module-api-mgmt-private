@@ -48,3 +48,9 @@ variable "additional_routes_apim" {
   }))
   default = []
 }
+
+variable "disable_trusted_service_connectivity" {
+  description = "Disable Trusted Service Connectivity (Managed Identity over-privileged access) for APIM. Set to true to disable this feature."
+  type        = bool
+  default     = false
+}
