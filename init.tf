@@ -19,9 +19,9 @@ locals {
 
   acme_environment = (var.environment == "aat") ? "stg" : (var.environment == "sandbox") ? "sbox" : (var.environment == "preview") ? "dev" : "${(var.environment == "perftest") ? "test" : "${var.environment}"}"
 
-  department = var.department == "sds" ? "dtssds" : "dcdcft"
+  department = var.department == "sds" ? "dtssds" : (var.department == "sps" ? "dtssps" : "dcdcft")
 
-  acmekv = var.department == "sds" ? "dtssds" : "dcdcftapps"
+  acmekv = var.department == "sds" ? "dtssds" : (var.department == "sps" ? "dtssps" : "dcdcftapps")
 
   sku_name = var.sku_name == "Premium" ? "Premium_3" : "Developer_1"
   zones    = var.sku_name == "Premium" ? ["1", "2", "3"] : []
@@ -110,6 +110,30 @@ locals {
     }
   }
 
+  acmedtsspsapps = {
+    sbox = {
+      subscription = "bd2864ed-4f3e-45ed-9c6a-8d179674bab1"
+    }
+    dev = {
+      subscription = "7cfd7e05-06a1-4d9b-a426-db304bc99aab"
+    }
+    stg = {
+      subscription = "70bea6e3-384f-4cf4-b551-743a78d716cd"
+    }
+    prod = {
+      subscription = "890625e2-7a8b-445c-81b4-8044a062cef3"
+    }
+    test = {
+      subscription = "4e0267c8-d18a-460b-8707-496f0b36954d"
+    }
+    ithc = {
+      subscription = "3939bf63-a2a9-404f-a023-0d21f1f14548"
+    }
+    demo = {
+      subscription = "058bf954-ac1f-462b-bca4-42a30314bd74"
+    }
+  }
+
   palo_environment_mapping = {
     sbox    = ["sbox"]
     nonprod = ["dev", "demo", "ithc", "test", "preview"]
@@ -133,5 +157,5 @@ provider "azurerm" {
   alias                      = "acmedcdcftapps"
   skip_provider_registration = "true"
   features {}
-  subscription_id = var.department == "sds" ? local.acmedtssdsapps[local.acme_environment].subscription : local.acmedcdcftapps[local.acme_environment].subscription
+  subscription_id = var.department == "sds" ? local.acmedtssdsapps[local.acme_environment].subscription : (var.department == "sps" ? local.acmedtsspsapps[local.acme_environment].subscription : local.acmedcdcftapps[local.acme_environment].subscription)
 }
