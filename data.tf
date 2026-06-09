@@ -7,7 +7,7 @@ data "azurerm_key_vault" "main" {
 }
 
 data "azurerm_key_vault_certificate" "certificate" {
-  name         = (local.key_vault_environment == "prod") ? "wildcard-platform-hmcts-net" : "wildcard-${local.key_vault_environment}-platform-hmcts-net"
+  name         = (local.key_vault_environment == "prod") ? "wildcard-${var.cert_domain}-hmcts-net" : "wildcard-${local.key_vault_environment}-${var.cert_domain}-hmcts-net"
   key_vault_id = data.azurerm_key_vault.main.id
 }
 

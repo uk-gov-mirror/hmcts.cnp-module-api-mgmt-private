@@ -55,6 +55,10 @@ variable "disable_trusted_service_connectivity" {
   default     = false
 }
 
+variable "cert_domain" {
+  default = "platform"
+}
+
 variable "custom_nsg_rules" {
   description = "A map of custom NSG rules to apply in addition to the default rules"
   type = map(object({
