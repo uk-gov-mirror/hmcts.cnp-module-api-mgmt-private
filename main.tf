@@ -66,21 +66,21 @@ resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
   api_management_id = azurerm_api_management.apim.id
 
   gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt.platform.hmcts.net" : "${var.department}-api-mgmt.${local.key_vault_environment}.platform.hmcts.net"
+    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt.${var.custom_top_level_domain}" : "${var.department}-api-mgmt.${local.key_vault_environment}.${var.custom_top_level_domain}"
     key_vault_id                 = local.cert_url
     negotiate_client_certificate = true
     default_ssl_binding          = true
   }
 
   gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
+    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt-appgw.${var.custom_top_level_domain}" : "${var.department}-api-mgmt-appgw.${local.key_vault_environment}.${var.custom_top_level_domain}"
     key_vault_id                 = local.cert_url
     negotiate_client_certificate = true
     default_ssl_binding          = true
   }
 
   gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-mtls-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-mtls-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
+    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-mtls-api-mgmt-appgw.${var.custom_top_level_domain}" : "${var.department}-mtls-api-mgmt-appgw.${local.key_vault_environment}.${var.custom_top_level_domain}"
     key_vault_id                 = local.cert_url
     negotiate_client_certificate = true
     default_ssl_binding          = true
