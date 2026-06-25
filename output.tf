@@ -16,3 +16,7 @@ output "custom_properties_after_update" {
   ) : {}
   sensitive = true
 }
+
+output "id" {
+  value = azurerm_api_management.apim.id
+}
