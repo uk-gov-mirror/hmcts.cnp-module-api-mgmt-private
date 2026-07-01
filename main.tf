@@ -25,6 +25,25 @@ resource "azurerm_api_management" "apim" {
   notification_sender_email = var.notification_sender_email
   virtual_network_type      = var.virtual_network_type
 
+  dynamic "sign_in" {
+    for_each = var.developer_portal != null && var.developer_portal.sign_in_enabled != null ? [var.developer_portal] : []
+    content {
+      enabled = sign_in.value.sign_in_enabled
+    }
+  }
+
+  dynamic "sign_up" {
+    for_each = var.developer_portal != null && var.developer_portal.sign_up_enabled != null ? [var.developer_portal] : []
+    content {
+      enabled = sign_up.value.sign_up.enabled
+      terms_of_service {
+        enabled          = sign_up.value.sign_up.terms_of_service.show_tos
+        text             = sign_up.value.sign_up.terms_of_service.text
+        consent_required = sign_up.value.sign_up.terms_of_service.consent_required
+      }
+    }
+  }
+
   virtual_network_configuration {
     subnet_id = data.azurerm_subnet.api-mgmt-subnet.id
   }
@@ -84,6 +103,14 @@ resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
     key_vault_id                 = local.cert_url
     negotiate_client_certificate = true
     default_ssl_binding          = true
+  }
+
+  dynamic "developer_portal" {
+    for_each = var.developer_portal != null && var.developer_portal.custom_domain != null ? [var.developer_portal] : []
+    content {
+      host_name                = developer_portal.value.custom_domain.fqdn
+      key_vault_certificate_id = data.azurerm_key_vault_certificate.developer_portal_certificate[0].versionless_secret_id
+    }
   }
 
   depends_on = [

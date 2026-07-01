@@ -84,3 +84,24 @@ variable "custom_top_level_domain" {
   type        = string
   default     = "platform.hmcts.net"
 }
+
+variable "developer_portal" {
+  description = "Configuration for the APIM developer portal custom domain and certificate"
+  type = object({
+    sign_in_enabled = optional(bool, false)
+    sign_up = optional(object({
+      enabled = bool
+      terms_of_service = object({
+        consent_required = bool
+        show_tos         = bool
+        text             = string
+      })
+    }))
+    custom_domain = optional(object({
+      fqdn         = string
+      key_vault_id = string
+      cert_name    = string
+    }))
+  })
+  default = {}
+}

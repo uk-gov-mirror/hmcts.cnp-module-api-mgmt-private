@@ -18,3 +18,9 @@ data "azapi_resource" "apim_custom_properties" {
 
   depends_on = [azurerm_api_management.apim]
 }
+
+data "azurerm_key_vault_certificate" "developer_portal_certificate" {
+  count        = var.developer_portal != null && var.developer_portal.custom_domain != null ? 1 : 0
+  name         = var.developer_portal.custom_domain.fqdn
+  key_vault_id = var.developer_portal.custom_domain.key_vault_id
+}
