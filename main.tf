@@ -33,7 +33,7 @@ resource "azurerm_api_management" "apim" {
   }
 
   dynamic "sign_up" {
-    for_each = var.developer_portal != null && var.developer_portal.sign_up_enabled != null ? [var.developer_portal] : []
+    for_each = var.developer_portal != null && var.developer_portal.sign_up != null ? [var.developer_portal] : []
     content {
       enabled = sign_up.value.sign_up.enabled
       terms_of_service {
