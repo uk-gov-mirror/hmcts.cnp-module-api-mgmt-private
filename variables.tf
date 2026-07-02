@@ -105,3 +105,12 @@ variable "developer_portal" {
   })
   default = {}
 }
+
+variable "management" {
+  type = object({
+    fqdn         = string
+    key_vault_id = string
+    cert_name    = string
+  })
+  default = null
+}

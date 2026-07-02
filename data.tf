@@ -24,3 +24,9 @@ data "azurerm_key_vault_certificate" "developer_portal_certificate" {
   name         = var.developer_portal.custom_domain.cert_name
   key_vault_id = var.developer_portal.custom_domain.key_vault_id
 }
+
+data "azurerm_key_vault_certificate" "management_certificate" {
+  count        = var.management != null ? 1 : 0
+  name         = var.management.cert_name
+  key_vault_id = var.management.key_vault_id
+}

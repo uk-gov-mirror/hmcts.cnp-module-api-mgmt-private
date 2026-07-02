@@ -113,6 +113,14 @@ resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
     }
   }
 
+  dynamic "management" {
+    for_each = var.management != null ? [var.management] : []
+    content {
+      host_name                = management.value.fqdn
+      key_vault_certificate_id = data.azurerm_key_vault_certificate.management_certificate[0].versionless_secret_id
+    }
+  }
+
   depends_on = [
     data.azurerm_key_vault_certificate.certificate,
     azurerm_api_management.apim,
