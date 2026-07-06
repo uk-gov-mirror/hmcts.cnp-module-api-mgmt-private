@@ -55,8 +55,30 @@ variable "disable_trusted_service_connectivity" {
   default     = false
 }
 
+variable "user_assigned_managed_identity_name" {
+  description = "The name of a User Assigned Managed Identity to assign to the API Management Service. If not provided, only SystemAssigned identity is used."
+  type        = string
+  default     = null
+}
+
+variable "user_assigned_managed_identity_resource_group" {
+  description = "The resource group of the User Assigned Managed Identity. Required when user_assigned_managed_identity_name is set."
+  type        = string
+  default     = null
+}
+
 variable "cert_domain" {
   default = "platform"
+}
+
+variable "custom_gateway_hostnames" {
+  description = "List of custom gateway hostnames. If not provided, defaults to the standard department-based naming."
+  type = list(object({
+    host_name                    = string
+    negotiate_client_certificate = optional(bool, true)
+    default_ssl_binding          = optional(bool, true)
+  }))
+  default = null
 }
 
 variable "custom_nsg_rules" {

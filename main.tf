@@ -30,7 +30,8 @@ resource "azurerm_api_management" "apim" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type         = var.user_assigned_managed_identity_name != null ? "UserAssigned" : "SystemAssigned"
+    identity_ids = var.user_assigned_managed_identity_name != null ? [data.azurerm_user_assigned_identity.uami[0].id] : []
   }
 
   zones                = local.zones
@@ -52,9 +53,9 @@ resource "azurerm_api_management" "apim" {
 }
 
 resource "azurerm_role_assignment" "apim" {
-  principal_id = azurerm_api_management.apim.identity[0].principal_id
-  scope        = data.azurerm_key_vault.main.id
-
+  count                = var.user_assigned_managed_identity_name != null ? 0 : 1
+  principal_id         = azurerm_api_management.apim.identity[0].principal_id
+  scope                = data.azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
 
   depends_on = [
@@ -62,28 +63,40 @@ resource "azurerm_role_assignment" "apim" {
   ]
 }
 
+// Required to stop resource recreation for existing apim sami use
+moved {
+  from = azurerm_role_assignment.apim
+  to   = azurerm_role_assignment.apim[0]
+}
+
 resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
   api_management_id = azurerm_api_management.apim.id
 
-  gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt.platform.hmcts.net" : "${var.department}-api-mgmt.${local.key_vault_environment}.platform.hmcts.net"
-    key_vault_id                 = local.cert_url
-    negotiate_client_certificate = true
-    default_ssl_binding          = true
-  }
-
-  gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
-    key_vault_id                 = local.cert_url
-    negotiate_client_certificate = true
-    default_ssl_binding          = true
-  }
-
-  gateway {
-    host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-mtls-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-mtls-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
-    key_vault_id                 = local.cert_url
-    negotiate_client_certificate = true
-    default_ssl_binding          = true
+  dynamic "gateway" {
+    for_each = var.custom_gateway_hostnames != null ? var.custom_gateway_hostnames : [
+      {
+        host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt.platform.hmcts.net" : "${var.department}-api-mgmt.${local.key_vault_environment}.platform.hmcts.net"
+        negotiate_client_certificate = true
+        default_ssl_binding          = true
+      },
+      {
+        host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
+        negotiate_client_certificate = true
+        default_ssl_binding          = true
+      },
+      {
+        host_name                    = (local.key_vault_environment == "prod") ? "${var.department}-mtls-api-mgmt-appgw.platform.hmcts.net" : "${var.department}-mtls-api-mgmt-appgw.${local.key_vault_environment}.platform.hmcts.net"
+        negotiate_client_certificate = true
+        default_ssl_binding          = true
+      }
+    ]
+    content {
+      host_name                       = gateway.value.host_name
+      key_vault_id                    = local.cert_url
+      negotiate_client_certificate    = gateway.value.negotiate_client_certificate
+      default_ssl_binding             = gateway.value.default_ssl_binding
+      ssl_keyvault_identity_client_id = var.user_assigned_managed_identity_name != null ? data.azurerm_user_assigned_identity.uami[0].client_id : null
+    }
   }
 
   depends_on = [

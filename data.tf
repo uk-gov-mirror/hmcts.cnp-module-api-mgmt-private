@@ -18,3 +18,9 @@ data "azapi_resource" "apim_custom_properties" {
 
   depends_on = [azurerm_api_management.apim]
 }
+
+data "azurerm_user_assigned_identity" "uami" {
+  count               = var.user_assigned_managed_identity_name != null ? 1 : 0
+  name                = var.user_assigned_managed_identity_name
+  resource_group_name = var.user_assigned_managed_identity_resource_group
+}
