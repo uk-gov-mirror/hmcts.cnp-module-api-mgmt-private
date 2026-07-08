@@ -28,7 +28,7 @@ locals {
 
   key_vault_environment = (var.environment == "sbox") ? "sandbox" : (var.environment == "stg") ? "staging" : var.environment
 
-  cert_url = replace(data.azurerm_key_vault_certificate.certificate.secret_id, "/${data.azurerm_key_vault_certificate.certificate.version}", "")
+  cert_url = var.certificate_secret_id != null ? var.certificate_secret_id : replace(data.azurerm_key_vault_certificate.certificate[0].secret_id, "/${data.azurerm_key_vault_certificate.certificate[0].version}", "")
   criticality = {
     sbox     = "Low"
     aat      = "High"

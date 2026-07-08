@@ -55,7 +55,7 @@ resource "azurerm_api_management" "apim" {
 resource "azurerm_role_assignment" "apim" {
   count                = var.user_assigned_managed_identity_name != null ? 0 : 1
   principal_id         = azurerm_api_management.apim.identity[0].principal_id
-  scope                = data.azurerm_key_vault.main.id
+  scope                = data.azurerm_key_vault.main[0].id
   role_definition_name = "Key Vault Secrets User"
 
   depends_on = [

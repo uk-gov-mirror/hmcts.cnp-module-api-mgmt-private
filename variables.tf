@@ -71,6 +71,12 @@ variable "cert_domain" {
   default = "platform"
 }
 
+variable "certificate_secret_id" {
+  description = "Versionless Key Vault secret ID of the gateway certificate. When set, it is used directly as the custom domain key_vault_id and the department-derived vault/certificate lookup is skipped. The certificate is fetched at runtime via the UAMI, which must have Key Vault Secrets User on the source vault."
+  type        = string
+  default     = null
+}
+
 variable "custom_gateway_hostnames" {
   description = "List of custom gateway hostnames. If not provided, defaults to the standard department-based naming."
   type = list(object({
