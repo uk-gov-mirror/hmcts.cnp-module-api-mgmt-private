@@ -5,11 +5,11 @@ data "azurerm_subnet" "api-mgmt-subnet" {
 }
 
 resource "azurerm_public_ip" "apim" {
-  name                = "${var.department}-api-mgmt-${var.environment}-private-pip"
+  name                = var.custom_name != null ? "${var.custom_name}-private-pip" : "${var.department}-api-mgmt-${var.environment}-private-pip"
   resource_group_name = var.virtual_network_resource_group
   location            = var.location
   allocation_method   = "Static"
-  domain_name_label   = "${var.department}-api-mgmt-${var.environment}-pip"
+  domain_name_label   = var.custom_name != null ? "${var.custom_name}-pip" : "${var.department}-api-mgmt-${var.environment}-pip"
   zones               = local.zones
 
   tags = var.common_tags

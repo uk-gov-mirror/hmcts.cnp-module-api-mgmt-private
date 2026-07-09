@@ -12,7 +12,7 @@ terraform {
 }
 
 locals {
-  name = "${var.department}-api-mgmt-${local.environment}"
+  name = var.custom_name != null ? var.custom_name : "${var.department}-api-mgmt-${local.environment}"
   # platform_api_mgmt_sku = var.environment == "prod" ? "Premium_1" : "Developer_1"
 
   environment = (var.environment == "aat") ? "stg" : (var.environment == "sandbox") ? "sbox" : "${(var.environment == "perftest") ? "test" : "${var.environment}"}"

@@ -77,6 +77,12 @@ variable "certificate_secret_id" {
   default     = null
 }
 
+variable "custom_name" {
+  description = "Overrides the derived instance name (department-api-mgmt-environment) used for the APIM service, public IP, NSG, route table and logger. Defaults to null (the derived name). Use when a distinct name is needed — e.g. a second APIM in a department that already owns the derived name. Does not affect department-driven vault/subscription/prefix selection."
+  type        = string
+  default     = null
+}
+
 variable "custom_gateway_hostnames" {
   description = "List of custom gateway hostnames. If not provided, defaults to the standard department-based naming."
   type = list(object({
