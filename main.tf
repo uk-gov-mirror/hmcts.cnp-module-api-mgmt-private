@@ -48,7 +48,9 @@ resource "azurerm_api_management" "apim" {
   tags = var.common_tags
 
   depends_on = [
-    azurerm_public_ip.apim
+    azurerm_public_ip.apim,
+    azurerm_subnet_network_security_group_association.apim,
+    azurerm_subnet_route_table_association.api-mgmt-subnet
   ]
 }
 
