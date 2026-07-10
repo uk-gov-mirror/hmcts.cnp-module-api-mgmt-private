@@ -55,8 +55,42 @@ variable "disable_trusted_service_connectivity" {
   default     = false
 }
 
+variable "user_assigned_managed_identity_name" {
+  description = "The name of a User Assigned Managed Identity to assign to the API Management Service. If not provided, only SystemAssigned identity is used."
+  type        = string
+  default     = null
+}
+
+variable "user_assigned_managed_identity_resource_group" {
+  description = "The resource group of the User Assigned Managed Identity. Required when user_assigned_managed_identity_name is set."
+  type        = string
+  default     = null
+}
+
 variable "cert_domain" {
   default = "platform"
+}
+
+variable "certificate_secret_id" {
+  description = "Versionless Key Vault secret ID of the gateway certificate. When set, it is used directly as the custom domain key_vault_id and the department-derived vault/certificate lookup is skipped. The certificate is fetched at runtime via the UAMI, which must have Key Vault Secrets User on the source vault."
+  type        = string
+  default     = null
+}
+
+variable "custom_name" {
+  description = "Overrides the derived instance name (department-api-mgmt-environment) used for the APIM service, public IP, NSG, route table and logger. Defaults to null (the derived name). Use when a distinct name is needed — e.g. a second APIM in a department that already owns the derived name. Does not affect department-driven vault/subscription/prefix selection."
+  type        = string
+  default     = null
+}
+
+variable "custom_gateway_hostnames" {
+  description = "List of custom gateway hostnames. If not provided, defaults to the standard department-based naming."
+  type = list(object({
+    host_name                    = string
+    negotiate_client_certificate = optional(bool, true)
+    default_ssl_binding          = optional(bool, true)
+  }))
+  default = null
 }
 
 variable "custom_nsg_rules" {
