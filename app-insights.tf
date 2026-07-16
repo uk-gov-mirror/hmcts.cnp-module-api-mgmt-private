@@ -8,6 +8,8 @@ module "application_insights" {
   resource_group_name = var.virtual_network_resource_group
   application_type    = "other"
 
+  sampling_percentage = var.sampling_percentage
+
   common_tags = var.common_tags
 }
 
