@@ -93,6 +93,12 @@ variable "custom_gateway_hostnames" {
   default = null
 }
 
+variable "sampling_percentage" {
+  description = "The sampling percentage for Application Insights. Defaults to null (uses the module default)."
+  type        = number
+  default     = null
+}
+
 variable "custom_nsg_rules" {
   description = "A map of custom NSG rules to apply in addition to the default rules"
   type = map(object({

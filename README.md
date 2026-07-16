@@ -54,13 +54,18 @@ Terraform module to create Azure APIM Instance with Private Endpoint
 | [azurerm_key_vault.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) | data source |
 | [azurerm_key_vault_certificate.certificate](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_certificate) | data source |
 | [azurerm_subnet.api-mgmt-subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
+| [azurerm_user_assigned_identity.uami](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/user_assigned_identity) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_routes_apim"></a> [additional\_routes\_apim](#input\_additional\_routes\_apim) | A list of additional route configurations | <pre>list(object({<br/>    name                   = string<br/>    address_prefix         = string<br/>    next_hop_type          = string<br/>    next_hop_in_ip_address = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_cert_domain"></a> [cert\_domain](#input\_cert\_domain) | n/a | `string` | `"platform"` | no |
+| <a name="input_certificate_secret_id"></a> [certificate\_secret\_id](#input\_certificate\_secret\_id) | Versionless Key Vault secret ID of the gateway certificate. When set, it is used directly as the custom domain key\_vault\_id and the department-derived vault/certificate lookup is skipped. The certificate is fetched at runtime via the UAMI, which must have Key Vault Secrets User on the source vault. | `string` | `null` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | n/a | `any` | n/a | yes |
+| <a name="input_custom_gateway_hostnames"></a> [custom\_gateway\_hostnames](#input\_custom\_gateway\_hostnames) | List of custom gateway hostnames. If not provided, defaults to the standard department-based naming. | <pre>list(object({<br/>    host_name                    = string<br/>    negotiate_client_certificate = optional(bool, true)<br/>    default_ssl_binding          = optional(bool, true)<br/>  }))</pre> | `null` | no |
+| <a name="input_custom_name"></a> [custom\_name](#input\_custom\_name) | Overrides the derived instance name (department-api-mgmt-environment) used for the APIM service, public IP, NSG, route table and logger. Defaults to null (the derived name). Use when a distinct name is needed — e.g. a second APIM in a department that already owns the derived name. Does not affect department-driven vault/subscription/prefix selection. | `string` | `null` | no |
 | <a name="input_custom_nsg_rules"></a> [custom\_nsg\_rules](#input\_custom\_nsg\_rules) | A map of custom NSG rules to apply in addition to the default rules | <pre>map(object({<br/>    priority                     = number<br/>    direction                    = string<br/>    access                       = string<br/>    protocol                     = string<br/>    source_port_range            = optional(string)<br/>    source_port_ranges           = optional(list(string))<br/>    destination_port_range       = optional(string)<br/>    destination_port_ranges      = optional(list(string))<br/>    source_address_prefix        = optional(string)<br/>    source_address_prefixes      = optional(list(string))<br/>    destination_address_prefix   = optional(string)<br/>    destination_address_prefixes = optional(list(string))<br/>    description                  = optional(string)<br/>  }))</pre> | `{}` | no |
 | <a name="input_department"></a> [department](#input\_department) | n/a | `any` | n/a | yes |
 | <a name="input_disable_trusted_service_connectivity"></a> [disable\_trusted\_service\_connectivity](#input\_disable\_trusted\_service\_connectivity) | Disable Trusted Service Connectivity (Managed Identity over-privileged access) for APIM. Set to true to disable this feature. | `bool` | `false` | no |
@@ -73,7 +78,10 @@ Terraform module to create Azure APIM Instance with Private Endpoint
 | <a name="input_route_name"></a> [route\_name](#input\_route\_name) | n/a | `string` | `"default"` | no |
 | <a name="input_route_next_hop_in_ip_address"></a> [route\_next\_hop\_in\_ip\_address](#input\_route\_next\_hop\_in\_ip\_address) | n/a | `string` | `"10.10.1.1"` | no |
 | <a name="input_route_next_hop_type"></a> [route\_next\_hop\_type](#input\_route\_next\_hop\_type) | n/a | `string` | `"VirtualAppliance"` | no |
+| <a name="input_sampling_percentage"></a> [sampling\_percentage](#input\_sampling\_percentage) | The sampling percentage for Application Insights. Defaults to null (uses the module default). | `number` | `null` | no |
 | <a name="input_sku_name"></a> [sku\_name](#input\_sku\_name) | n/a | `any` | n/a | yes |
+| <a name="input_user_assigned_managed_identity_name"></a> [user\_assigned\_managed\_identity\_name](#input\_user\_assigned\_managed\_identity\_name) | The name of a User Assigned Managed Identity to assign to the API Management Service. If not provided, only SystemAssigned identity is used. | `string` | `null` | no |
+| <a name="input_user_assigned_managed_identity_resource_group"></a> [user\_assigned\_managed\_identity\_resource\_group](#input\_user\_assigned\_managed\_identity\_resource\_group) | The resource group of the User Assigned Managed Identity. Required when user\_assigned\_managed\_identity\_name is set. | `string` | `null` | no |
 | <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name) | n/a | `any` | n/a | yes |
 | <a name="input_virtual_network_resource_group"></a> [virtual\_network\_resource\_group](#input\_virtual\_network\_resource\_group) | n/a | `any` | n/a | yes |
 | <a name="input_virtual_network_type"></a> [virtual\_network\_type](#input\_virtual\_network\_type) | n/a | `any` | n/a | yes |
@@ -84,5 +92,6 @@ Terraform module to create Azure APIM Instance with Private Endpoint
 |------|-------------|
 | <a name="output_custom_properties_after_update"></a> [custom\_properties\_after\_update](#output\_custom\_properties\_after\_update) | Custom properties after applying the DisableOverPrivilegedAccess setting (if disable\_trusted\_service\_connectivity is true) |
 | <a name="output_existing_custom_properties"></a> [existing\_custom\_properties](#output\_existing\_custom\_properties) | Existing custom properties before applying the DisableOverPrivilegedAccess setting |
+| <a name="output_id"></a> [id](#output\_id) | n/a |
 | <a name="output_name"></a> [name](#output\_name) | n/a |
 <!-- END_TF_DOCS -->
