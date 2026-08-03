@@ -114,3 +114,18 @@ variable "management" {
   })
   default = null
 }
+
+variable "apim_diagnostic_settings" {
+  description = "Configuration for the APIM Application Insights diagnostic settings"
+  type = object({
+    sampling_percentage          = optional(number, 100)
+    always_log_errors            = optional(bool, true)
+    http_correlation_protocol    = optional(string, "W3C")
+    verbosity                    = optional(string, "information")
+    frontend_request_body_bytes  = optional(number, 0)
+    frontend_response_body_bytes = optional(number, 0)
+    backend_request_body_bytes   = optional(number, 0)
+    backend_response_body_bytes  = optional(number, 0)
+  })
+  default = {}
+}

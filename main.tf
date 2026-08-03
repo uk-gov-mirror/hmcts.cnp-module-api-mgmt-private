@@ -128,6 +128,16 @@ resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
   ]
 }
 
+resource "azurerm_role_assignment" "apim_app_insights" {
+  scope                = module.application_insights.id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = azurerm_api_management.apim.identity[0].principal_id
+
+  depends_on = [
+    azurerm_api_management.apim
+  ]
+}
+
 resource "azurerm_api_management_logger" "apim" {
   name                = "${local.name}-logger"
   api_management_name = azurerm_api_management.apim.name
@@ -135,7 +145,38 @@ resource "azurerm_api_management_logger" "apim" {
   resource_id         = module.application_insights.id
 
   application_insights {
-    instrumentation_key = module.application_insights.instrumentation_key
+    connection_string = module.application_insights.connection_string
+  }
+
+  depends_on = [
+    azurerm_role_assignment.apim_app_insights
+  ]
+}
+
+resource "azurerm_api_management_diagnostic" "applicationinsights" {
+  identifier                = "applicationinsights"
+  resource_group_name       = var.virtual_network_resource_group
+  api_management_name       = azurerm_api_management.apim.name
+  api_management_logger_id  = azurerm_api_management_logger.apim.id
+  sampling_percentage       = var.apim_diagnostic_settings.sampling_percentage
+  always_log_errors         = var.apim_diagnostic_settings.always_log_errors
+  http_correlation_protocol = var.apim_diagnostic_settings.http_correlation_protocol
+  verbosity                 = var.apim_diagnostic_settings.verbosity
+
+  frontend_request {
+    body_bytes = var.apim_diagnostic_settings.frontend_request_body_bytes
+  }
+
+  frontend_response {
+    body_bytes = var.apim_diagnostic_settings.frontend_response_body_bytes
+  }
+
+  backend_request {
+    body_bytes = var.apim_diagnostic_settings.backend_request_body_bytes
+  }
+
+  backend_response {
+    body_bytes = var.apim_diagnostic_settings.backend_response_body_bytes
   }
 }
 
