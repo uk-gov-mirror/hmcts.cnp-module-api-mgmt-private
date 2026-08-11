@@ -99,6 +99,12 @@ variable "sampling_percentage" {
   default     = null
 }
 
+variable "app_insights_custom_name" {
+  description = "Overrides the derived Application Insights name prefix (department-api-mgmt). The environment suffix is still appended automatically. Defaults to null (the derived name). Use when a distinct name is needed to avoid clashing with other Application Insights resources."
+  type        = string
+  default     = null
+}
+
 variable "custom_nsg_rules" {
   description = "A map of custom NSG rules to apply in addition to the default rules"
   type = map(object({
