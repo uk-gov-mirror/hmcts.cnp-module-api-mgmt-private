@@ -71,6 +71,21 @@ moved {
   to   = azurerm_role_assignment.apim[0]
 }
 
+moved {
+  from = azurerm_network_security_rule.AccessRedisService
+  to   = azurerm_network_security_rule.AccessRedisService[0]
+}
+
+moved {
+  from = azurerm_network_security_rule.SyncCounter
+  to   = azurerm_network_security_rule.SyncCounter[0]
+}
+
+moved {
+  from = azurerm_network_security_rule.loadbalancer
+  to   = azurerm_network_security_rule.loadbalancer[0]
+}
+
 resource "azurerm_api_management_custom_domain" "api-management-custom-domain" {
   api_management_id = azurerm_api_management.apim.id
 
