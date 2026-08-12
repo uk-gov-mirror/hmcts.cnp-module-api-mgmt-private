@@ -1,4 +1,62 @@
-Terraform module to create Azure APIM Instance with Private Endpoint
+# Terraform module to create Azure APIM Instance with Private Endpoint
+
+## Network Security Group (NSG) Rule Controls
+
+This module includes optional controls for specific Network Security Group (NSG) rules, allowing callers to disable rules that are not required by their workload or network architecture.
+
+### Compatibility-First Opt-Out Design
+
+This release uses a compatibility-first opt-out approach (rather than opt-in or default-secure). All three optional NSG rule flags permanently default to `true`. Existing module consumers retain full backward compatibility upon upgrade without requiring configuration changes. Callers can explicitly disable rules by setting the corresponding variables to `false`.
+
+### Optional NSG Rules Description & Relevance
+
+- **`enable_access_redis_service_nsg_rule`** (default: `true`)
+  - **Rule**: `AccessRedisService` (Inbound TCP ports 6381–6383 from `VirtualNetwork`)
+  - **Purpose & Relevance**: Allows inbound TCP traffic for internal cache communication between machines/nodes within the APIM deployment. Relevant for internal caching features that rely on Redis cache lookup between machines/nodes within the deployment.
+  - **When to disable**: Can be set to `false` if internal cache communication between machines/nodes within the APIM deployment is not required.
+
+- **`enable_sync_counter_nsg_rule`** (default: `true`)
+  - **Rule**: `SyncCounter` (Inbound UDP port 4290 from `VirtualNetwork`)
+  - **Purpose & Relevance**: Allows inbound UDP traffic for rate-limit counter synchronization between machines/nodes within the APIM deployment. Relevant when rate limiting policies depend on counter synchronization between machines/nodes in the deployment.
+  - **When to disable**: Can be set to `false` if rate-limit counter synchronization between machines/nodes within the APIM deployment is not required.
+
+- **`enable_loadbalancer_nsg_rule`** (default: `true`)
+  - **Rule**: `loadbalancer` (Inbound TCP port range `*` from `VirtualNetwork`)
+  - **Purpose & Relevance**: Allows inbound TCP traffic originating from the `VirtualNetwork` source tag. Relevance depends on the APIM SKU and virtual network integration topology (such as internal/external VNet mode or internal load balancing).
+  - **When to disable**: Can be set to `false` if network architecture and routing policies do not require this broad inbound rule from the `VirtualNetwork` tag.
+
+### Azure Guidance & Rationale
+
+Azure-specific rationale is grounded in official Microsoft documentation: [Azure API Management VNet Reference](https://learn.microsoft.com/azure/api-management/virtual-network-reference#required-ports).
+
+- Official guidance classifies TCP 6381–6383 (internal cache) and UDP 4290 (counter sync) as feature-specific traffic required for internal cache communication or rate-limit counter synchronization between machines/nodes within the APIM deployment.
+- Azure load balancer traffic requirements depend on the APIM SKU and VNet integration topology.
+- Note: The module's existing `loadbalancer` NSG rule matches inbound TCP traffic from the `VirtualNetwork` source tag to destination port range `*`, which is broader than Microsoft's narrower health-probe guidance targeting the `AzureLoadBalancer` service tag.
+
+### Example: Disabling Optional NSG Rules
+
+To opt out of all three optional NSG rules when their traffic is not required:
+
+```hcl
+module "api_management" {
+  source = "git::https://github.com/hmcts/cnp-module-api-mgmt-private.git?ref=vX.X.X"
+
+  # ... required variables ...
+
+  # Opt-out of optional NSG rules
+  enable_access_redis_service_nsg_rule = false
+  enable_sync_counter_nsg_rule         = false
+  enable_loadbalancer_nsg_rule         = false
+}
+```
+
+### Migration Guidance
+
+- **Default Behavior**: Existing consumers upgrading to this version retain current behavior by default (`default = true`) with zero breaking changes.
+- **Opting Out**: Consumers should evaluate their APIM feature usage and network topology, and set flags to `false` only after confirming that their workload does not require the corresponding traffic.
+- **Resource Identity Preservation**: Module `moved` blocks change Terraform addresses to indexed `[0]` while preserving existing resource and state identity and avoiding recreation for rules left enabled (`true`).
+- **Rule Removal**: Setting a flag to `false` intentionally removes/destroys the corresponding `azurerm_network_security_rule` resource from the NSG and Terraform state.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -11,9 +69,9 @@ Terraform module to create Azure APIM Instance with Private Endpoint
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | >= 1.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_azurerm.acmedcdcftapps"></a> [azurerm.acmedcdcftapps](#provider\_azurerm.acmedcdcftapps) | >= 3.7.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.12.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+| <a name="provider_azurerm.acmedcdcftapps"></a> [azurerm.acmedcdcftapps](#provider\_azurerm.acmedcdcftapps) | 5.0.1 |
 
 ## Modules
 
@@ -70,6 +128,9 @@ Terraform module to create Azure APIM Instance with Private Endpoint
 | <a name="input_custom_nsg_rules"></a> [custom\_nsg\_rules](#input\_custom\_nsg\_rules) | A map of custom NSG rules to apply in addition to the default rules | <pre>map(object({<br/>    priority                     = number<br/>    direction                    = string<br/>    access                       = string<br/>    protocol                     = string<br/>    source_port_range            = optional(string)<br/>    source_port_ranges           = optional(list(string))<br/>    destination_port_range       = optional(string)<br/>    destination_port_ranges      = optional(list(string))<br/>    source_address_prefix        = optional(string)<br/>    source_address_prefixes      = optional(list(string))<br/>    destination_address_prefix   = optional(string)<br/>    destination_address_prefixes = optional(list(string))<br/>    description                  = optional(string)<br/>  }))</pre> | `{}` | no |
 | <a name="input_department"></a> [department](#input\_department) | n/a | `any` | n/a | yes |
 | <a name="input_disable_trusted_service_connectivity"></a> [disable\_trusted\_service\_connectivity](#input\_disable\_trusted\_service\_connectivity) | Disable Trusted Service Connectivity (Managed Identity over-privileged access) for APIM. Set to true to disable this feature. | `bool` | `false` | no |
+| <a name="input_enable_access_redis_service_nsg_rule"></a> [enable\_access\_redis\_service\_nsg\_rule](#input\_enable\_access\_redis\_service\_nsg\_rule) | Controls creation of the AccessRedisService NSG rule (inbound TCP 6381-6383 for internal cache communication between machines/nodes within the APIM deployment). | `bool` | `true` | no |
+| <a name="input_enable_loadbalancer_nsg_rule"></a> [enable\_loadbalancer\_nsg\_rule](#input\_enable\_loadbalancer\_nsg\_rule) | Controls creation of the loadbalancer NSG rule (inbound TCP from VirtualNetwork). | `bool` | `true` | no |
+| <a name="input_enable_sync_counter_nsg_rule"></a> [enable\_sync\_counter\_nsg\_rule](#input\_enable\_sync\_counter\_nsg\_rule) | Controls creation of the SyncCounter NSG rule (inbound UDP 4290 for rate-limit counter synchronization between machines/nodes within the APIM deployment). | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | n/a | `any` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"uksouth"` | no |
 | <a name="input_notification_sender_email"></a> [notification\_sender\_email](#input\_notification\_sender\_email) | n/a | `string` | `"apimgmt-noreply@mail.windowsazure.com"` | no |

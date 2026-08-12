@@ -105,6 +105,24 @@ variable "app_insights_custom_name" {
   default     = null
 }
 
+variable "enable_access_redis_service_nsg_rule" {
+  description = "Controls creation of the AccessRedisService NSG rule (inbound TCP 6381-6383 for internal cache communication between machines/nodes within the APIM deployment)."
+  type        = bool
+  default     = true
+}
+
+variable "enable_sync_counter_nsg_rule" {
+  description = "Controls creation of the SyncCounter NSG rule (inbound UDP 4290 for rate-limit counter synchronization between machines/nodes within the APIM deployment)."
+  type        = bool
+  default     = true
+}
+
+variable "enable_loadbalancer_nsg_rule" {
+  description = "Controls creation of the loadbalancer NSG rule (inbound TCP from VirtualNetwork)."
+  type        = bool
+  default     = true
+}
+
 variable "custom_nsg_rules" {
   description = "A map of custom NSG rules to apply in addition to the default rules"
   type = map(object({

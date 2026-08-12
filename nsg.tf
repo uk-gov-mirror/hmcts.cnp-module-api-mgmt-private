@@ -53,6 +53,8 @@ resource "azurerm_network_security_rule" "vpn" {
 }
 
 resource "azurerm_network_security_rule" "AccessRedisService" {
+  count = var.enable_access_redis_service_nsg_rule ? 1 : 0
+
   name                        = "AccessRedisService"
   priority                    = 103
   direction                   = "Inbound"
@@ -67,6 +69,8 @@ resource "azurerm_network_security_rule" "AccessRedisService" {
 }
 
 resource "azurerm_network_security_rule" "SyncCounter" {
+  count = var.enable_sync_counter_nsg_rule ? 1 : 0
+
   name                        = "SyncCounter"
   priority                    = 104
   direction                   = "Inbound"
@@ -81,6 +85,8 @@ resource "azurerm_network_security_rule" "SyncCounter" {
 }
 
 resource "azurerm_network_security_rule" "loadbalancer" {
+  count = var.enable_loadbalancer_nsg_rule ? 1 : 0
+
   name                        = "loadbalancer"
   priority                    = 105
   direction                   = "Inbound"
