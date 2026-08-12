@@ -69,9 +69,9 @@ module "api_management" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.12.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
-| <a name="provider_azurerm.acmedcdcftapps"></a> [azurerm.acmedcdcftapps](#provider\_azurerm.acmedcdcftapps) | 5.0.1 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | >= 1.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
+| <a name="provider_azurerm.acmedcdcftapps"></a> [azurerm.acmedcdcftapps](#provider\_azurerm.acmedcdcftapps) | >= 3.7.0 |
 
 ## Modules
 
