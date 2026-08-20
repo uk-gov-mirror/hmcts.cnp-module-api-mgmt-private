@@ -129,3 +129,9 @@ variable "apim_diagnostic_settings" {
   })
   default = {}
 }
+
+variable "acme_environment" {
+  description = "Allows overriding the environment used for the ACME Key Vault name. If not provided, defaults to the local.acme_environment value."
+  type        = string
+  default     = null
+}
