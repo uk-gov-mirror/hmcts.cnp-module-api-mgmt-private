@@ -114,7 +114,7 @@ locals {
     sbox = {
       subscription = "bd2864ed-4f3e-45ed-9c6a-8d179674bab1"
     }
-    dev = {
+    preview = {
       subscription = "7cfd7e05-06a1-4d9b-a426-db304bc99aab"
     }
     stg = {
@@ -123,7 +123,7 @@ locals {
     prod = {
       subscription = "890625e2-7a8b-445c-81b4-8044a062cef3"
     }
-    test = {
+    perftest = {
       subscription = "4e0267c8-d18a-460b-8707-496f0b36954d"
     }
     ithc = {
